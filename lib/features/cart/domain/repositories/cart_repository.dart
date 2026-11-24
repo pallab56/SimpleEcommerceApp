@@ -1,0 +1,1 @@
+﻿// CartRepository — abstract contract.

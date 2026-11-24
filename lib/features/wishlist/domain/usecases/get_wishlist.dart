@@ -1,0 +1,1 @@
+﻿// GetWishlist use case.

@@ -1,0 +1,1 @@
+﻿// Banner entity — imageUrl, targetRoute.

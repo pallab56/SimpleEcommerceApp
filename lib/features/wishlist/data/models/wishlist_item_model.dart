@@ -1,0 +1,1 @@
+﻿// WishlistItemModel — JSON DTO.

@@ -1,0 +1,1 @@
+﻿// CartItemModel — JSON DTO.

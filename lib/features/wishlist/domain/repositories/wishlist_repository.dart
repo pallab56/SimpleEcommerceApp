@@ -1,0 +1,1 @@
+﻿// WishlistRepository — abstract contract.

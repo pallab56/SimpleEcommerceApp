@@ -1,0 +1,1 @@
+﻿// GetAllCategories use case.

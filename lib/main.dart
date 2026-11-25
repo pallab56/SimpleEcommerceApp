@@ -1,11 +1,17 @@
+import 'package:ecommerceapp/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:ecommerceapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecommerceapp/init_dependencies.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_strings.dart';
 import 'core/route/app_router.dart';
 
-void main() {
+void main()  async{
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await initDependencies();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -19,7 +25,13 @@ void main() {
     ),
   );
 
-  runApp(const CraftyBayApp());
+  runApp( MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => serviceLocator<AppUserCubit>()),
+        BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
+      ],
+      child: const CraftyBayApp(),
+    ),);
 }
 
 class CraftyBayApp extends StatelessWidget {
@@ -32,7 +44,7 @@ class CraftyBayApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       initialRoute: AppRoutes.splash,
-      onGenerateRoute: AppRouter.generateRoute,
+      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }

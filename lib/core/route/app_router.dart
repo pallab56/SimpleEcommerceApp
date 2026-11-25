@@ -1,82 +1,126 @@
+import 'package:ecommerceapp/core/common/entities/category.dart';
 import 'package:flutter/material.dart';
-import '../../features/splash/presentation/pages/splash_page.dart';
+import '../../features/auth/presentation/pages/complete_profile_page.dart';
 import '../../features/auth/presentation/pages/email_verification_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
-import '../../features/auth/presentation/pages/complete_profile_page.dart';
-import '../../features/main_nav/presentation/pages/main_bottom_nav_page.dart';
+import '../../features/auth/presentation/pages/sign_up_page.dart';
+import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/category/presentation/pages/categories_page.dart';
 import '../../features/category/presentation/pages/category_products_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/main_nav/presentation/pages/main_bottom_nav_page.dart';
+import '../../features/product/presentation/pages/create_review_page.dart';
 import '../../features/product/presentation/pages/product_details_page.dart';
 import '../../features/product/presentation/pages/product_reviews_page.dart';
-import '../../features/product/presentation/pages/create_review_page.dart';
-import '../../features/product/domain/entities/review.dart';
-import '../../core/common/entities/category.dart';
+import '../../features/splash/presentation/pages/splash_page.dart';
 
-/// All named-route path constants for the app.
 class AppRoutes {
-  AppRoutes._();
-
   static const String splash = '/';
   static const String emailVerification = '/email-verification';
+  static const String signUp = '/sign-up';
   static const String otpVerification = '/otp-verification';
   static const String completeProfile = '/complete-profile';
-  static const String mainNav = '/main';
+  static const String mainNav = '/main-nav';
+  static const String home = '/home';
   static const String categories = '/categories';
   static const String categoryProducts = '/category-products';
   static const String productDetails = '/product-details';
   static const String productReviews = '/product-reviews';
   static const String createReview = '/create-review';
+  static const String cart = '/cart';
 }
 
-/// Centralized route generator — register as [MaterialApp.onGenerateRoute].
 class AppRouter {
-  AppRouter._();
-
-  static Route<dynamic> generateRoute(RouteSettings settings) {
+  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.splash:
-        return _build(const SplashPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const SplashPage(),
+        );
 
       case AppRoutes.emailVerification:
-        return _build(EmailVerificationPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const EmailVerificationPage(),
+        );
+
+      case AppRoutes.signUp:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const SignUpPage(),
+        );
 
       case AppRoutes.otpVerification:
-        return _build(OtpVerificationPage());
+        final email = settings.arguments as String? ?? '';
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => OtpVerificationPage(email: email),
+        );
 
       case AppRoutes.completeProfile:
-        return _build(CompleteProfilePage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => CompleteProfilePage(),
+        );
 
       case AppRoutes.mainNav:
-        return _build(const MainBottomNavPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const MainBottomNavPage(),
+        );
+
+      case AppRoutes.home:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const HomePage(),
+        );
 
       case AppRoutes.categories:
-        return _build(const CategoriesPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const CategoriesPage(),
+        );
 
       case AppRoutes.categoryProducts:
         final category = settings.arguments as Category;
-        return _build(CategoryProductsPage(category: category));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => CategoryProductsPage(category: category),
+        );
 
       case AppRoutes.productDetails:
-        final id = settings.arguments as String? ?? 'p0';
-        return _build(ProductDetailsPage(productId: id));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ProductDetailsPage(productId: '',),
+        );
 
       case AppRoutes.productReviews:
-        final reviews = settings.arguments as List<Review>;
-        return _build(ProductReviewsPage(reviews: reviews));
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ProductReviewsPage(reviews: [],),
+        );
 
       case AppRoutes.createReview:
-        return _build(CreateReviewPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => CreateReviewPage(),
+        );
+
+      case AppRoutes.cart:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const CartPage(),
+        );
 
       default:
-        return _build(
-          const Scaffold(
-            body: Center(child: Text('Route not found')),
+        return MaterialPageRoute(
+          builder: (_) => const Scaffold(
+            body: Center(
+              child: Text('Route not found'),
+            ),
           ),
         );
     }
-  }
-
-  static MaterialPageRoute<dynamic> _build(Widget page) {
-    return MaterialPageRoute(builder: (_) => page);
   }
 }

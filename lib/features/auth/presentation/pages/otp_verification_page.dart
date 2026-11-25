@@ -7,15 +7,6 @@ import '../../../../core/route/app_router.dart';
 import '../widgets/otp_pin_field.dart';
 import '../widgets/resend_timer_text.dart';
 
-/// Enter OTP Code screen.
-///
-/// Layout (matches CraftyBay mockup):
-///  - AppLogo centred
-///  - "Enter OTP Code" headline
-///  - Subtitle
-///  - 4-digit OTP pin field
-///  - "Next" button
-///  - Countdown timer / Resend Code link
 class OtpVerificationPage extends StatefulWidget {
   const OtpVerificationPage({super.key});
 
@@ -24,11 +15,12 @@ class OtpVerificationPage extends StatefulWidget {
 }
 
 class _OtpVerificationPageState extends State<OtpVerificationPage> {
+  // Plain field — OTP is a transient value, no Cubit rebuild needed
   String _otp = '';
 
   void _onVerify() {
     if (_otp.length < 4) return;
-    // TODO: Dispatch OTP verify event to AuthBloc
+    // TODO: dispatch VerifyOtp event to AuthBloc
     Navigator.pushNamed(context, AppRoutes.completeProfile);
   }
 
@@ -42,16 +34,18 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ── Logo ──────────────────────────────────────────────────
+                // Logo
                 const AppLogo(width: 100),
                 const SizedBox(height: 24),
 
-                // ── Title & subtitle ──────────────────────────────────────
+                // Title
                 Text(
                   AppStrings.enterOtpTitle,
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 8),
+
+                // Subtitle
                 const Text(
                   AppStrings.enterOtpSubtitle,
                   textAlign: TextAlign.center,
@@ -62,33 +56,23 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // ── OTP pin boxes ─────────────────────────────────────────
-                OtpPinField(
-                  onCompleted: (otp) => _otp = otp,
-                ),
+                // 4-digit OTP boxes
+                OtpPinField(onCompleted: (otp) => _otp = otp),
                 const SizedBox(height: 24),
 
-                // ── Verify button ─────────────────────────────────────────
+                // Verify button
                 CustomButton(
                   text: AppStrings.next,
                   onPressed: _onVerify,
                 ),
                 const SizedBox(height: 24),
 
-                // ── Countdown / Resend link ───────────────────────────────
+                // Countdown / Resend
                 ResendTimerText(
                   durationSeconds: 120,
                   onResend: () {
-                    // TODO: Dispatch resend OTP event to AuthBloc
+                    // TODO: dispatch ResendOtp event to AuthBloc
                   },
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  AppStrings.resendCode,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                  ),
                 ),
               ],
             ),

@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/entities/product.dart';
+import '../../../../core/constants/app_assets.dart';
 import 'wishlist_state.dart';
 
-/// WishlistCubit — manages loading and toggling wishlist items.
 class WishlistCubit extends Cubit<WishlistState> {
   WishlistCubit() : super(const WishlistInitial());
 
@@ -10,13 +10,23 @@ class WishlistCubit extends Cubit<WishlistState> {
 
   Future<void> loadWishlist() async {
     emit(const WishlistLoading());
-    try {
-      await Future.delayed(const Duration(milliseconds: 400));
-      // Mock — replace with repository call
-      emit(WishlistLoaded(List.from(_items)));
-    } catch (e) {
-      emit(WishlistError(e.toString()));
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // Seed mock data so the wishlist looks populated
+    if (_items.isEmpty) {
+      _items.addAll(List.generate(
+        6,
+        (i) => Product(
+          id: 'w$i',
+          title: 'Happy New Year Special Shoe',
+          price: 100.0 + i * 15,
+          rating: 4.0 + (i % 5) * 0.2,
+          imageUrl: AppAssets.shoe,
+          categoryId: '1',
+        ),
+      ));
     }
+    emit(WishlistLoaded(List.from(_items)));
   }
 
   void addToWishlist(Product product) {

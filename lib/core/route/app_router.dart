@@ -6,6 +6,10 @@ import '../../features/auth/presentation/pages/complete_profile_page.dart';
 import '../../features/main_nav/presentation/pages/main_bottom_nav_page.dart';
 import '../../features/category/presentation/pages/categories_page.dart';
 import '../../features/category/presentation/pages/category_products_page.dart';
+import '../../features/product/presentation/pages/product_details_page.dart';
+import '../../features/product/presentation/pages/product_reviews_page.dart';
+import '../../features/product/presentation/pages/create_review_page.dart';
+import '../../features/product/domain/entities/review.dart';
 import '../../core/common/entities/category.dart';
 
 /// All named-route path constants for the app.
@@ -20,6 +24,8 @@ class AppRoutes {
   static const String categories = '/categories';
   static const String categoryProducts = '/category-products';
   static const String productDetails = '/product-details';
+  static const String productReviews = '/product-reviews';
+  static const String createReview = '/create-review';
 }
 
 /// Centralized route generator — register as [MaterialApp.onGenerateRoute].
@@ -51,12 +57,15 @@ class AppRouter {
         return _build(CategoryProductsPage(category: category));
 
       case AppRoutes.productDetails:
-        // TODO: wire up product details page when implemented
-        return _build(
-          const Scaffold(
-            body: Center(child: Text('Product Details — coming soon')),
-          ),
-        );
+        final id = settings.arguments as String? ?? 'p0';
+        return _build(ProductDetailsPage(productId: id));
+
+      case AppRoutes.productReviews:
+        final reviews = settings.arguments as List<Review>;
+        return _build(ProductReviewsPage(reviews: reviews));
+
+      case AppRoutes.createReview:
+        return _build(CreateReviewPage());
 
       default:
         return _build(

@@ -1,21 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../theme/app_colors.dart';
+import '../../constants/app_assets.dart';
 import '../entities/product.dart';
 
 /// Reusable vertical product card.
 ///
-/// Shows: network image, title, price, star rating, and a heart (wishlist) icon.
-///
-/// Usage:
-/// ```dart
-/// ProductCard(
-///   product: product,
-///   onTap: () => Navigator.pushNamed(context, AppRoutes.productDetails),
-///   onWishlistTap: () {},
-///   isWishlisted: false,
-/// )
-/// ```
+/// Image always comes from [AppAssets.shoe] (local asset).
+/// Shows: image, title, price, star rating, wishlist heart.
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback? onTap;
@@ -49,36 +40,27 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product image
+            // ── Image + heart ─────────────────────────────────────────────
             Expanded(
               child: Stack(
+                fit: StackFit.expand,
                 children: [
                   ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: CachedNetworkImage(
-                      imageUrl: product.imageUrl,
-                      width: double.infinity,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                    child: Image.asset(
+                      AppAssets.shoe,
                       fit: BoxFit.cover,
-                      placeholder: (ctx, url) => const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      errorWidget: (ctx, url, err) => const Icon(
-                        Icons.image_not_supported_outlined,
-                        color: AppColors.textHint,
-                      ),
                     ),
                   ),
-                  // Wishlist heart
                   Positioned(
                     top: 6,
                     right: 6,
                     child: GestureDetector(
                       onTap: onWishlistTap,
                       child: Icon(
-                        isWishlisted
-                            ? Icons.favorite
-                            : Icons.favorite_border,
+                        isWishlisted ? Icons.favorite : Icons.favorite_border,
                         color: isWishlisted
                             ? AppColors.error
                             : AppColors.textSecondary,
@@ -90,9 +72,9 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // Info section
+            // ── Info ──────────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

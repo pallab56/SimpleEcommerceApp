@@ -1,61 +1,55 @@
 import 'package:flutter/material.dart';
 import '../../../../core/common/widgets/custom_button.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 
-/// Bottom bar showing total price + Checkout button.
 class CheckoutBottomBar extends StatelessWidget {
-  final double total;
-  final VoidCallback? onCheckout;
+  final double totalPrice;
+  final VoidCallback onCheckout;
 
   const CheckoutBottomBar({
     super.key,
-    required this.total,
-    this.onCheckout,
+    required this.totalPrice,
+    required this.onCheckout,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
-          ),
-        ],
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Total
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                AppStrings.totalPrice,
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                'Total Price',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
               ),
-              const SizedBox(height: 2),
               Text(
-                '\$${total.toStringAsFixed(2)}',
+                '\$${totalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 20),
-
-          // Checkout button
-          Expanded(
+          SizedBox(
+            width: 150,
             child: CustomButton(
-              text: AppStrings.checkout,
+              text: 'Checkout',
               onPressed: onCheckout,
             ),
           ),

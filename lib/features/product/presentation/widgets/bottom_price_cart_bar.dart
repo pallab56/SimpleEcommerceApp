@@ -1,57 +1,54 @@
 import 'package:flutter/material.dart';
 import '../../../../core/common/widgets/custom_button.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 
-/// Price + "Add To Cart" bottom action bar on Product Details page.
 class BottomPriceCartBar extends StatelessWidget {
-  final double price;
-  final VoidCallback? onAddToCart;
+  final double totalPrice;
+  final VoidCallback onAddToCart;
 
   const BottomPriceCartBar({
     super.key,
-    required this.price,
-    this.onAddToCart,
+    required this.totalPrice,
+    required this.onAddToCart,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
-          ),
-        ],
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Price',
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary)),
-              const SizedBox(height: 2),
+              const Text(
+                'Price',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
               Text(
-                '\$${price.toStringAsFixed(2)}',
+                '\$${totalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(width: 20),
-          Expanded(
+          SizedBox(
+            width: 150,
             child: CustomButton(
-              text: AppStrings.addToCart,
+              text: 'Add To Cart',
               onPressed: onAddToCart,
             ),
           ),

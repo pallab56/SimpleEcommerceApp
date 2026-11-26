@@ -1,5 +1,8 @@
+import 'package:ecommerceapp/features/wishlist/presentation/bloc/wishlist_cubit.dart';
+import 'package:ecommerceapp/features/wishlist/presentation/bloc/wishlist_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/common/entities/category.dart';
 import '../../../../core/common/entities/product.dart';
 import '../../../../core/common/widgets/product_card.dart';
@@ -153,14 +156,24 @@ class _ProductGrid extends StatelessWidget {
         crossAxisSpacing: 12,
         childAspectRatio: 0.72,
       ),
-      itemBuilder: (_, i) => ProductCard(
-        product: products[i],
-        onTap: () => Navigator.pushNamed(
-          context,
-          AppRoutes.productDetails,
-          arguments: products[i].id,
-        ),
-      ),
+      itemBuilder: (_, i) {
+        final product = products[i];
+        return BlocBuilder<WishlistCubit, WishlistState>(
+          builder: (context, wishState) {
+            return ProductCard(
+              product: product,
+              isWishlisted: wishState.isWishlisted(product.id),
+              onWishlistTap: () =>
+                  context.read<WishlistCubit>().toggleWishlist(product),
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRoutes.productDetails,
+                arguments: product.id,
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -1,82 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/widgets/custom_app_bar.dart';
-import '../../../../core/common/widgets/product_card.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/route/app_router.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../bloc/wishlist_cubit.dart';
 import '../bloc/wishlist_state.dart';
+import '../widgets/wishlist_grid.dart';
 
-class WishlistPage extends StatelessWidget {
+class WishlistPage extends StatefulWidget {
   const WishlistPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => WishlistCubit()..loadWishlist(),
-      child: const _WishlistView(),
-    );
-  }
+  State<WishlistPage> createState() => _WishlistPageState();
 }
 
-class _WishlistView extends StatelessWidget {
-  const _WishlistView();
+class _WishlistPageState extends State<WishlistPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<WishlistCubit>().loadWishlist();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(
-        title: AppStrings.wishlist,
+        title: 'Wishlist',
         showBackButton: false,
       ),
-      body: BlocBuilder<WishlistCubit, WishlistState>(
+      body: BlocConsumer<WishlistCubit, WishlistState>(
+        listener: (context, state) {
+          if (state.errorMessage != null && state.items.isNotEmpty) {
+            SnackBarHelper.showError(context, state.errorMessage!);
+          }
+        },
         builder: (context, state) {
-          if (state is WishlistLoading || state is WishlistInitial) {
+          if (state.isLoading && state.items.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (state is WishlistError) {
-            return Center(child: Text(state.message));
-          }
-          if (state is WishlistLoaded) {
-            if (state.items.isEmpty) {
-              return const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.favorite_border, size: 64, color: Color(0xFFBDBDBD)),
-                    SizedBox(height: 16),
-                    Text(
-                      'Your wishlist is empty',
-                      style: TextStyle(fontSize: 16, color: Color(0xFF8E8E8E)),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.items.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.68,
+          if (state.errorMessage != null && state.items.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(state.errorMessage!),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () =>
+                        context.read<WishlistCubit>().loadWishlist(),
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
-              itemBuilder: (_, i) {
-                final product = state.items[i];
-                return ProductCard(
-                  product: product,
-                  isWishlisted: true,
-                  onTap: () =>
-                      Navigator.pushNamed(context, AppRoutes.productDetails),
-                  onWishlistTap: () => context
-                      .read<WishlistCubit>()
-                      .removeFromWishlist(product.id),
-                );
-              },
             );
           }
-          return const SizedBox.shrink();
+          if (state.items.isEmpty) {
+            return const Center(child: Text('Your wishlist is empty'));
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => context.read<WishlistCubit>().loadWishlist(),
+            child: WishlistGrid(items: state.items),
+          );
         },
       ),
     );

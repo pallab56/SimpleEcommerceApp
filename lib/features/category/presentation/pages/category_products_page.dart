@@ -1,5 +1,8 @@
+import 'package:ecommerceapp/features/wishlist/presentation/bloc/wishlist_cubit.dart';
+import 'package:ecommerceapp/features/wishlist/presentation/bloc/wishlist_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../core/common/widgets/custom_app_bar.dart';
 import '../../../../core/common/widgets/product_card.dart';
 import '../../../../core/route/app_router.dart';
@@ -60,23 +63,29 @@ class CategoryProductsPage extends StatelessWidget {
                     CategoryConstants.screenPadding,
                   ),
                   itemCount: state.products.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: CategoryConstants.productGridColumns,
                     mainAxisSpacing: CategoryConstants.productGridSpacing,
                     crossAxisSpacing: CategoryConstants.productGridSpacing,
-                    childAspectRatio:
-                        CategoryConstants.productChildAspectRatio,
+                    childAspectRatio: CategoryConstants.productChildAspectRatio,
                   ),
                   itemBuilder: (_, index) {
                     final product = state.products[index];
-                    return ProductCard(
-                      product: product,
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        AppRoutes.productDetails,
-                        arguments: product.id,
-                      ),
+                    return BlocBuilder<WishlistCubit, WishlistState>(
+                      builder: (context, wishState) {
+                        return ProductCard(
+                          product: product,
+                          isWishlisted: wishState.isWishlisted(product.id),
+                          onWishlistTap: () => context
+                              .read<WishlistCubit>()
+                              .toggleWishlist(product),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.productDetails,
+                            arguments: product.id,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

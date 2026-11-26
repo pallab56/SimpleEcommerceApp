@@ -2,27 +2,38 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/common/entities/product.dart';
 
 class CartItem extends Equatable {
+  final String id;
   final Product product;
   final int quantity;
-  final String? selectedSize;
-  final String? selectedColor;
+  final String? color;
+  final String? size;
 
   const CartItem({
+    required this.id,
     required this.product,
-    this.quantity = 1,
-    this.selectedSize,
-    this.selectedColor,
+    required this.quantity,
+    this.color,
+    this.size,
   });
 
-  CartItem copyWith({int? quantity}) => CartItem(
-        product: product,
-        quantity: quantity ?? this.quantity,
-        selectedSize: selectedSize,
-        selectedColor: selectedColor,
-      );
+  double get totalPrice => product.price * quantity;
 
-  double get subtotal => product.price * quantity;
+  CartItem copyWith({
+    String? id,
+    Product? product,
+    int? quantity,
+    String? color,
+    String? size,
+  }) {
+    return CartItem(
+      id: id ?? this.id,
+      product: product ?? this.product,
+      quantity: quantity ?? this.quantity,
+      color: color ?? this.color,
+      size: size ?? this.size,
+    );
+  }
 
   @override
-  List<Object?> get props => [product.id, quantity, selectedSize, selectedColor];
+  List<Object?> get props => [id, product, quantity, color, size];
 }

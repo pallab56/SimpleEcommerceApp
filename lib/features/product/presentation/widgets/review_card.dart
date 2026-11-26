@@ -1,17 +1,18 @@
-import 'package:ecommerceapp/features/product/domain/entities/review.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../domain/entities/review.dart';
 
-/// Single review card: avatar, name, stars, date, comment.
 class ReviewCard extends StatelessWidget {
   final Review review;
 
-  const ReviewCard({super.key, required this.review});
+  const ReviewCard({
+    super.key,
+    required this.review,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -19,7 +20,7 @@ class ReviewCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: AppColors.black.withValues(alpha: 0.05),
-            blurRadius: 6,
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
@@ -29,63 +30,49 @@ class ReviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              // Avatar
               CircleAvatar(
-                radius: 20,
-                backgroundColor: AppColors.primaryLight,
-                child: Text(
-                  review.authorName[0],
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                radius: 16,
+                backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                child: const Icon(
+                  Icons.person_outline,
+                  size: 18,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 10),
-
-              // Name + date
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      review.authorName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Text(
-                      review.date,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  review.userName,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-
-              // Stars
               Row(
-                children: List.generate(5, (i) {
-                  return Icon(
-                    i < review.rating.round() ? Icons.star : Icons.star_border,
-                    size: 14,
-                    color: AppColors.star,
-                  );
-                }),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.star, size: 16, color: AppColors.star),
+                  const SizedBox(width: 4),
+                  Text(
+                    review.rating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             review.comment,
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
-              height: 1.5,
+              height: 1.4,
             ),
           ),
         ],

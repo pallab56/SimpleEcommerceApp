@@ -1,64 +1,63 @@
-import 'package:ecommerceapp/features/product/domain/entities/review.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/common/entities/product.dart';
-import '../../../../core/constants/app_assets.dart';
-
+import '../../domain/usecases/get_product_details.dart';
 import 'product_state.dart';
 
 class ProductCubit extends Cubit<ProductState> {
-  ProductCubit() : super(const ProductInitial());
+  final GetProductDetails _getProductDetails;
 
-  Future<void> loadProduct(String productId) async {
+  ProductCubit({
+    required GetProductDetails getProductDetails,
+  })  : _getProductDetails = getProductDetails,
+        super(const ProductInitial());
+
+  Future<void> loadProductDetails(String productId) async {
+    if (productId.isEmpty) {
+      emit(const ProductError('Invalid product ID'));
+      return;
+    }
+
     emit(const ProductLoading());
-    try {
-      await Future.delayed(const Duration(milliseconds: 400));
 
-      final product = Product(
-        id: productId,
-        title: 'Happy New Year Special Shoe',
-        price: 100.00,
-        rating: 4.5,
-        imageUrl: AppAssets.shoe,
-        categoryId: '1',
-      );
+    final result = await _getProductDetails(productId);
 
-      final reviews = List.generate(
-        5,
-        (i) => Review(
-          id: 'r$i',
-          authorName: ['Alice Smith', 'Bob Lee', 'Cara Jones', 'Dan White', 'Eva Brown'][i],
-          avatarUrl: 'https://i.pravatar.cc/80?img=${i + 1}',
-          rating: [5.0, 4.0, 4.5, 3.0, 5.0][i],
-          comment: 'Great product! Very comfortable and stylish. Highly recommend.',
-          date: '2024-0${i + 1}-15',
+    result.fold(
+      (failure) => emit(ProductError(failure.message)),
+      (product) => emit(
+        ProductLoaded(
+          product: product,
+          selectedColor:
+              product.colors.isNotEmpty ? product.colors.first : null,
+          selectedSize: product.sizes.isNotEmpty ? product.sizes.first : null,
         ),
-      );
+      ),
+    );
+  }
 
-      emit(ProductLoaded(
-        product: product,
-        reviews: reviews,
-        selectedSize: 'M',
-        quantity: 1,
-      ));
-    } catch (e) {
-      emit(ProductError(e.toString()));
+  void incrementQuantity() {
+    final current = state;
+    if (current is ProductLoaded) {
+      emit(current.copyWith(quantity: current.quantity + 1));
+    }
+  }
+
+  void decrementQuantity() {
+    final current = state;
+    if (current is ProductLoaded && current.quantity > 1) {
+      emit(current.copyWith(quantity: current.quantity - 1));
+    }
+  }
+
+  void selectColor(String color) {
+    final current = state;
+    if (current is ProductLoaded) {
+      emit(current.copyWith(selectedColor: color));
     }
   }
 
   void selectSize(String size) {
-    final s = state;
-    if (s is ProductLoaded) emit(s.copyWith(selectedSize: size));
-  }
-
-  void increment() {
-    final s = state;
-    if (s is ProductLoaded) emit(s.copyWith(quantity: s.quantity + 1));
-  }
-
-  void decrement() {
-    final s = state;
-    if (s is ProductLoaded && s.quantity > 1) {
-      emit(s.copyWith(quantity: s.quantity - 1));
+    final current = state;
+    if (current is ProductLoaded) {
+      emit(current.copyWith(selectedSize: size));
     }
   }
 }

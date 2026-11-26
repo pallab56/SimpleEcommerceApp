@@ -1,53 +1,56 @@
-import 'package:ecommerceapp/features/product/domain/entities/review.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/common/entities/product.dart';
+import '../../domain/entities/product_details.dart';
 
-
-abstract class ProductState extends Equatable {
+sealed class ProductState extends Equatable {
   const ProductState();
+
   @override
   List<Object?> get props => [];
 }
 
-class ProductInitial extends ProductState {
+final class ProductInitial extends ProductState {
   const ProductInitial();
 }
 
-class ProductLoading extends ProductState {
+final class ProductLoading extends ProductState {
   const ProductLoading();
 }
 
-class ProductLoaded extends ProductState {
-  final Product product;
-  final List<Review> reviews;
-  final String selectedSize;
+final class ProductLoaded extends ProductState {
+  final ProductDetails product;
   final int quantity;
+  final String? selectedColor;
+  final String? selectedSize;
 
   const ProductLoaded({
     required this.product,
-    required this.reviews,
-    required this.selectedSize,
-    required this.quantity,
+    this.quantity = 1,
+    this.selectedColor,
+    this.selectedSize,
   });
 
   ProductLoaded copyWith({
-    String? selectedSize,
     int? quantity,
-  }) =>
-      ProductLoaded(
-        product: product,
-        reviews: reviews,
-        selectedSize: selectedSize ?? this.selectedSize,
-        quantity: quantity ?? this.quantity,
-      );
+    String? selectedColor,
+    String? selectedSize,
+  }) {
+    return ProductLoaded(
+      product: product,
+      quantity: quantity ?? this.quantity,
+      selectedColor: selectedColor ?? this.selectedColor,
+      selectedSize: selectedSize ?? this.selectedSize,
+    );
+  }
 
   @override
-  List<Object?> get props => [product, reviews, selectedSize, quantity];
+  List<Object?> get props => [product, quantity, selectedColor, selectedSize];
 }
 
-class ProductError extends ProductState {
+final class ProductError extends ProductState {
   final String message;
+
   const ProductError(this.message);
+
   @override
   List<Object?> get props => [message];
 }

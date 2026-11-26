@@ -1,87 +1,110 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/widgets/custom_app_bar.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/route/app_router.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../bloc/cart_cubit.dart';
 import '../bloc/cart_state.dart';
 import '../widgets/cart_item_card.dart';
 import '../widgets/checkout_bottom_bar.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => CartCubit(),
-      child: const _CartView(),
-    );
-  }
+  State<CartPage> createState() => _CartPageState();
 }
 
-class _CartView extends StatelessWidget {
-  const _CartView();
+class _CartPageState extends State<CartPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<CartCubit>().loadCart();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(
-        title: AppStrings.cart,
+        title: 'Cart',
         showBackButton: false,
       ),
-      body: BlocBuilder<CartCubit, CartState>(
+      body: BlocConsumer<CartCubit, CartState>(
+        listener: (context, state) {
+          if (state.errorMessage != null && state.items.isNotEmpty) {
+            SnackBarHelper.showError(context, state.errorMessage!);
+          }
+          if (state.actionMessage != null) {
+            SnackBarHelper.showSuccess(context, state.actionMessage!);
+          }
+        },
         builder: (context, state) {
-          if (state is CartInitial) {
+          if (state.isLoading && state.items.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (state is CartLoaded) {
-            if (state.items.isEmpty) return _emptyCart();
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
+          if (state.errorMessage != null && state.items.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(state.errorMessage!),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => context.read<CartCubit>().loadCart(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (state.items.isEmpty) {
+            return const Center(child: Text('Your cart is empty'));
+          }
+
+          final cubit = context.read<CartCubit>();
+
+          return Column(
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: cubit.loadCart,
+                  child: ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: state.items.length,
-                    itemBuilder: (context, i) {
-                      final item = state.items[i];
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (_, index) {
+                      final item = state.items[index];
                       return CartItemCard(
                         item: item,
-                        onIncrement: () =>
-                            context.read<CartCubit>().increment(item.product.id),
-                        onDecrement: () =>
-                            context.read<CartCubit>().decrement(item.product.id),
-                        onRemove: () =>
-                            context.read<CartCubit>().remove(item.product.id),
+                        onIncrement: () => cubit.updateQuantity(
+                          cartItemId: item.id,
+                          newQuantity: item.quantity + 1,
+                        ),
+                        onDecrement: () => cubit.updateQuantity(
+                          cartItemId: item.id,
+                          newQuantity: item.quantity - 1,
+                        ),
+                        onDelete: () => cubit.removeItem(item.id),
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.productDetails,
+                          arguments: item.product.id,
+                        ),
                       );
                     },
                   ),
                 ),
-                CheckoutBottomBar(
-                  total: state.total,
-                  onCheckout: () {},
+              ),
+              CheckoutBottomBar(
+                totalPrice: state.totalPrice,
+                onCheckout: () => SnackBarHelper.showSuccess(
+                  context,
+                  'Proceeding to checkout (\$${state.totalPrice.toStringAsFixed(2)})',
                 ),
-              ],
-            );
-          }
-          return const SizedBox.shrink();
+              ),
+            ],
+          );
         },
-      ),
-    );
-  }
-
-  Widget _emptyCart() {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.shopping_cart_outlined, size: 64, color: AppColors.textHint),
-          SizedBox(height: 16),
-          Text(
-            'Your cart is empty',
-            style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
-          ),
-        ],
       ),
     );
   }

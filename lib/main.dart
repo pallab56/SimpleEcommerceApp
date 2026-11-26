@@ -1,7 +1,9 @@
 import 'package:ecommerceapp/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:ecommerceapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecommerceapp/features/cart/presentation/bloc/cart_cubit.dart';
 import 'package:ecommerceapp/features/category/presentation/bloc/category_cubit.dart';
 import 'package:ecommerceapp/features/home/presentation/bloc/home_cubit.dart';
+import 'package:ecommerceapp/features/wishlist/presentation/bloc/wishlist_cubit.dart';
 import 'package:ecommerceapp/init_dependencies.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,6 +39,10 @@ void main() async {
           create: (_) => serviceLocator<CategoryCubit>()..loadCategories(),
         ),
         BlocProvider(create: (_) => serviceLocator<HomeCubit>()..loadHome()),
+        BlocProvider(
+          create: (_) => serviceLocator<WishlistCubit>()..loadWishlist(),
+        ),
+        BlocProvider(create: (_) => serviceLocator<CartCubit>()..loadCart()),
       ],
       child: const CraftyBayApp(),
     ),

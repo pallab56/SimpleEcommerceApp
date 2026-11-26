@@ -22,7 +22,7 @@ class ApiUrls {
   // ==================== Product ====================
   static const String products = '$baseUrl/products'; // GET (List)
   
-   static String productDetails(String id) => '$baseUrl/products/$id';
+  static String productDetails(String id) => '$baseUrl/products/id/$id';
   static const String createProduct = '$baseUrl/product'; // POST (Admin)
   static String productBySlug(String slug) => '$baseUrl/products/$slug'; // GET
   // static String productById(String productId) => '$baseUrl/products/id/$productId'; // GET
@@ -35,7 +35,7 @@ class ApiUrls {
 
   // ==================== Cart & Wishlist ====================
   static const String cart = '$baseUrl/cart'; // GET (List), POST (Add)
-  static String cartItemById(String cartItemId) => '$baseUrl/cart/$cartItemId'; // PATCH, DELETE
+  static String cartItem(String id) => '$baseUrl/cart/$id'; // PATCH, DELETE
 
   static const String wishlist = '$baseUrl/wishlist'; // GET (List), POST (Add)
   static String removeWishlist(String id) => '$baseUrl/wishlist/$id';

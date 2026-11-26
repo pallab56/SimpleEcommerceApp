@@ -1,73 +1,120 @@
-import 'package:ecommerceapp/features/product/domain/entities/review.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/widgets/custom_app_bar.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/route/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
-
+import '../../../../init_dependencies.dart';
+import '../bloc/review_cubit.dart';
+import '../bloc/review_state.dart';
 import '../widgets/review_card.dart';
 
-/// Full list of product reviews with a bottom FAB to write a new one.
 class ProductReviewsPage extends StatelessWidget {
-  final List<Review> reviews;
+  final String productId;
 
-  const ProductReviewsPage({super.key, required this.reviews});
+  const ProductReviewsPage({
+    super.key,
+    required this.productId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => serviceLocator<ReviewCubit>()..loadReviews(productId),
+      child: _ProductReviewsView(productId: productId),
+    );
+  }
+}
+
+class _ProductReviewsView extends StatelessWidget {
+  final String productId;
+
+  const _ProductReviewsView({required this.productId});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: AppStrings.reviews),
-      body: reviews.isEmpty
-          ? const Center(
-              child: Text(
-                'No reviews yet',
-                style: TextStyle(color: AppColors.textSecondary),
+      appBar: const CustomAppBar(title: 'Reviews'),
+      body: BlocBuilder<ReviewCubit, ReviewState>(
+        builder: (context, state) {
+          if (state.isLoading && state.reviews.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state.errorMessage != null && state.reviews.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(state.errorMessage!),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () =>
+                        context.read<ReviewCubit>().loadReviews(productId),
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: reviews.length,
-              itemBuilder: (_, i) => ReviewCard(review: reviews[i]),
-            ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.06),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                '${reviews.length} Reviews',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+            );
+          }
+
+          return Column(
+            children: [
+              Expanded(
+                child: state.reviews.isEmpty
+                    ? const Center(child: Text('No reviews yet. Be the first!'))
+                    : RefreshIndicator(
+                        onRefresh: () =>
+                            context.read<ReviewCubit>().loadReviews(productId),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: state.reviews.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (_, index) =>
+                              ReviewCard(review: state.reviews[index]),
+                        ),
+                      ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Reviews (${state.reviews.length})',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    FloatingActionButton.small(
+                      backgroundColor: AppColors.primary,
+                      onPressed: () async {
+                        final added = await Navigator.pushNamed(
+                          context,
+                          AppRoutes.createReview,
+                          arguments: productId,
+                        );
+                        if (added == true && context.mounted) {
+                          context.read<ReviewCubit>().loadReviews(productId);
+                        }
+                      },
+                      child: const Icon(Icons.add, color: Colors.white),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            FloatingActionButton.extended(
-              heroTag: 'reviews_fab',
-              onPressed: () =>
-                  Navigator.pushNamed(context, AppRoutes.createReview),
-              backgroundColor: AppColors.primary,
-              label: const Text(
-                AppStrings.createReview,
-                style: TextStyle(
-                    color: AppColors.white, fontWeight: FontWeight.w600),
-              ),
-              icon: const Icon(Icons.edit_outlined, color: AppColors.white),
-              elevation: 0,
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

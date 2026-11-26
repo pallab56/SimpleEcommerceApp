@@ -1,30 +1,39 @@
 import 'package:equatable/equatable.dart';
-import '../../../../core/common/entities/product.dart';
+import '../../domain/entities/wishlist_item.dart';
 
-abstract class WishlistState extends Equatable {
-  const WishlistState();
+class WishlistState extends Equatable {
+  final List<WishlistItem> items;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const WishlistState({
+    this.items = const [],
+    this.isLoading = false,
+    this.errorMessage,
+  });
+
+  bool isWishlisted(String productId) =>
+      items.any((item) => item.product.id == productId);
+
+  WishlistItem? findByProductId(String productId) {
+    for (final item in items) {
+      if (item.product.id == productId) return item;
+    }
+    return null;
+  }
+
+  WishlistState copyWith({
+    List<WishlistItem>? items,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
+    return WishlistState(
+      items: items ?? this.items,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+    );
+  }
+
   @override
-  List<Object?> get props => [];
-}
-
-class WishlistInitial extends WishlistState {
-  const WishlistInitial();
-}
-
-class WishlistLoading extends WishlistState {
-  const WishlistLoading();
-}
-
-class WishlistLoaded extends WishlistState {
-  final List<Product> items;
-  const WishlistLoaded(this.items);
-  @override
-  List<Object?> get props => [items];
-}
-
-class WishlistError extends WishlistState {
-  final String message;
-  const WishlistError(this.message);
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [items, isLoading, errorMessage];
 }

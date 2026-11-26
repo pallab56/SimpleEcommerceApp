@@ -5,8 +5,8 @@ class HomeProductModel extends Product {
     required super.id,
     required super.title,
     required super.price,
-    required super.imageUrl,
     required super.rating,
+    required super.imageUrl,
     required super.categoryId,
   });
 
@@ -14,9 +14,8 @@ class HomeProductModel extends Product {
     final photos = json['photos'] as List<dynamic>?;
     final firstPhoto = (photos != null && photos.isNotEmpty)
         ? photos.first.toString()
-        : (json['image'] ?? json['photo_url'] ?? '');
+        : (json['image'] ?? json['photo_url'] ?? '').toString();
 
-    // Extract categoryId whether API returns a Map, List, or String
     String extractedCategoryId = '';
     final rawCategory = json['category'] ?? json['categories'];
     if (rawCategory is Map<String, dynamic>) {
@@ -31,11 +30,11 @@ class HomeProductModel extends Product {
     }
 
     return HomeProductModel(
-      id: json['_id'] ?? '',
-      title: json['title'] ?? '',
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      title: json['title']?.toString() ?? '',
       price: (json['current_price'] ?? json['price'] ?? 0).toDouble(),
-      imageUrl: firstPhoto,
       rating: (json['rating'] ?? 4.5).toDouble(),
+      imageUrl: firstPhoto,
       categoryId: extractedCategoryId,
     );
   }

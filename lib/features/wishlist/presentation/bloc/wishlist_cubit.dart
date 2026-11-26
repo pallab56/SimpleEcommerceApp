@@ -1,46 +1,86 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/entities/product.dart';
-import '../../../../core/constants/app_assets.dart';
+import '../../../../core/usecase/usecase.dart';
+import '../../domain/entities/wishlist_item.dart';
+import '../../domain/usecases/add_to_wishlist.dart';
+import '../../domain/usecases/get_wishlist.dart';
+import '../../domain/usecases/remove_from_wishlist.dart';
 import 'wishlist_state.dart';
 
 class WishlistCubit extends Cubit<WishlistState> {
-  WishlistCubit() : super(const WishlistInitial());
+  final GetWishlist _getWishlist;
+  final AddToWishlist _addToWishlist;
+  final RemoveFromWishlist _removeFromWishlist;
 
-  final List<Product> _items = [];
+  WishlistCubit({
+    required GetWishlist getWishlist,
+    required AddToWishlist addToWishlist,
+    required RemoveFromWishlist removeFromWishlist,
+  })  : _getWishlist = getWishlist,
+        _addToWishlist = addToWishlist,
+        _removeFromWishlist = removeFromWishlist,
+        super(const WishlistState());
 
   Future<void> loadWishlist() async {
-    emit(const WishlistLoading());
-    await Future.delayed(const Duration(milliseconds: 300));
+    emit(state.copyWith(isLoading: true, errorMessage: null));
 
-    // Seed mock data so the wishlist looks populated
-    if (_items.isEmpty) {
-      _items.addAll(List.generate(
-        6,
-        (i) => Product(
-          id: 'w$i',
-          title: 'Happy New Year Special Shoe',
-          price: 100.0 + i * 15,
-          rating: 4.0 + (i % 5) * 0.2,
-          imageUrl: AppAssets.shoe,
-          categoryId: '1',
+    final result = await _getWishlist(const NoParams());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(isLoading: false, errorMessage: failure.message),
+      ),
+      (items) => emit(
+        state.copyWith(items: items, isLoading: false, errorMessage: null),
+      ),
+    );
+  }
+
+  Future<void> toggleWishlist(Product product) async {
+    final existing = state.findByProductId(product.id);
+    final previousItems = List<WishlistItem>.from(state.items);
+
+    if (existing != null) {
+      emit(
+        state.copyWith(
+          items: state.items
+              .where((item) => item.product.id != product.id)
+              .toList(),
+          errorMessage: null,
         ),
-      ));
+      );
+
+      final deleteId = existing.id.isNotEmpty ? existing.id : product.id;
+      final result = await _removeFromWishlist(deleteId);
+      result.fold(
+        (failure) => emit(
+          state.copyWith(items: previousItems, errorMessage: failure.message),
+        ),
+        (_) {},
+      );
+    } else {
+      emit(
+        state.copyWith(
+          items: [
+            ...state.items,
+            WishlistItem(id: '', product: product),
+          ],
+          errorMessage: null,
+        ),
+      );
+
+      final result = await _addToWishlist(product.id);
+      await result.fold(
+        (failure) async => emit(
+          state.copyWith(items: previousItems, errorMessage: failure.message),
+        ),
+        (_) async {
+          final refreshed = await _getWishlist(const NoParams());
+          refreshed.fold(
+            (_) {},
+            (items) => emit(state.copyWith(items: items)),
+          );
+        },
+      );
     }
-    emit(WishlistLoaded(List.from(_items)));
   }
-
-  void addToWishlist(Product product) {
-    if (!_items.any((p) => p.id == product.id)) {
-      _items.add(product);
-      emit(WishlistLoaded(List.from(_items)));
-    }
-  }
-
-  void removeFromWishlist(String productId) {
-    _items.removeWhere((p) => p.id == productId);
-    emit(WishlistLoaded(List.from(_items)));
-  }
-
-  bool isWishlisted(String productId) =>
-      _items.any((p) => p.id == productId);
 }

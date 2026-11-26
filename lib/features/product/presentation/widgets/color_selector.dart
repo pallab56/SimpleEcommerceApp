@@ -1,46 +1,41 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 
-/// Row of circular color swatches.
 class ColorSelector extends StatelessWidget {
-  static const colors = [
-    Color(0xFF000000),
-    Color(0xFF607D8B),
-    Color(0xFF795548),
-    Color(0xFF2196F3),
-  ];
-
-  final Color selectedColor;
-  final ValueChanged<Color> onSelect;
+  final List<String> colors;
+  final String? selectedColor;
+  final ValueChanged<String> onColorSelected;
 
   const ColorSelector({
     super.key,
+    required this.colors,
     required this.selectedColor,
-    required this.onSelect,
+    required this.onColorSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: colors.map((c) {
-        final isSelected = c == selectedColor;
-        return GestureDetector(
-          onTap: () => onSelect(c),
-          child: Container(
-            margin: const EdgeInsets.only(right: 10),
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: c,
-              border: Border.all(
-                color: isSelected ? AppColors.primary : Colors.transparent,
-                width: 2.5,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+    if (colors.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Color',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: colors.map((color) {
+            return ChoiceChip(
+              label: Text(color),
+              selected: selectedColor == color,
+              onSelected: (_) => onColorSelected(color),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

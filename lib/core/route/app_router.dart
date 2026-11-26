@@ -1,5 +1,7 @@
 import 'package:ecommerceapp/core/common/entities/category.dart';
+import 'package:ecommerceapp/core/common/entities/product.dart';
 import 'package:flutter/material.dart';
+
 import '../../features/auth/presentation/pages/complete_profile_page.dart';
 import '../../features/auth/presentation/pages/email_verification_page.dart';
 import '../../features/auth/presentation/pages/otp_verification_page.dart';
@@ -90,21 +92,27 @@ class AppRouter {
         );
 
       case AppRoutes.productDetails:
+        final args = settings.arguments;
+        final productId = args is Product
+            ? args.id
+            : (args is String ? args : '');
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ProductDetailsPage(productId: '',),
+          builder: (_) => ProductDetailsPage(productId: productId),
         );
 
       case AppRoutes.productReviews:
+        final productId = settings.arguments as String? ?? '';
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => ProductReviewsPage(reviews: [],),
+          builder: (_) => ProductReviewsPage(productId: productId),
         );
 
       case AppRoutes.createReview:
+        final productId = settings.arguments as String? ?? '';
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => CreateReviewPage(),
+          builder: (_) => CreateReviewPage(productId: productId),
         );
 
       case AppRoutes.cart:
@@ -115,11 +123,8 @@ class AppRouter {
 
       default:
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(
-              child: Text('Route not found'),
-            ),
-          ),
+          builder: (_) =>
+              const Scaffold(body: Center(child: Text('Route not found'))),
         );
     }
   }

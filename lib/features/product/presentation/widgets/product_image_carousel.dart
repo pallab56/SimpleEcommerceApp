@@ -2,60 +2,73 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/theme/app_colors.dart';
 
-/// Auto-scrolling image slider with dot indicators (Product Details top section).
 class ProductImageCarousel extends StatefulWidget {
-  /// Pass the same [imageAsset] path multiple times if only one image exists yet.
-  final int imageCount;
+  final List<String> photos;
 
-  const ProductImageCarousel({super.key, this.imageCount = 3});
+  const ProductImageCarousel({
+    super.key,
+    required this.photos,
+  });
 
   @override
   State<ProductImageCarousel> createState() => _ProductImageCarouselState();
 }
 
 class _ProductImageCarouselState extends State<ProductImageCarousel> {
-  final _controller = PageController();
-  int _current = 0;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  int _activeIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final itemCount = widget.photos.isNotEmpty ? widget.photos.length : 1;
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
       children: [
         SizedBox(
-          height: 280,
+          height: 240,
           child: PageView.builder(
-            controller: _controller,
-            itemCount: widget.imageCount,
-            onPageChanged: (i) => setState(() => _current = i),
-            itemBuilder: (_, i) => Image.asset(
-              AppAssets.shoe,
-              fit: BoxFit.contain,
-            ),
+            itemCount: itemCount,
+            onPageChanged: (index) => setState(() => _activeIndex = index),
+            itemBuilder: (_, index) {
+              final url = widget.photos.isNotEmpty ? widget.photos[index] : '';
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: url.startsWith('http')
+                    ? Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Image.asset(
+                          AppAssets.shoe,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Image.asset(
+                        AppAssets.shoe,
+                        fit: BoxFit.cover,
+                      ),
+              );
+            },
           ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            widget.imageCount,
-            (i) => AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: _current == i ? 20 : 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: _current == i ? AppColors.primary : AppColors.border,
-                borderRadius: BorderRadius.circular(4),
-              ),
+        if (widget.photos.length > 1)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.photos.length, (index) {
+                final isActive = index == _activeIndex;
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: isActive ? 16 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isActive ? AppColors.primary : Colors.white70,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
             ),
           ),
-        ),
       ],
     );
   }

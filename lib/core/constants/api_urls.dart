@@ -21,9 +21,11 @@ class ApiUrls {
 
   // ==================== Product ====================
   static const String products = '$baseUrl/products'; // GET (List)
+  
+   static String productDetails(String id) => '$baseUrl/products/$id';
   static const String createProduct = '$baseUrl/product'; // POST (Admin)
   static String productBySlug(String slug) => '$baseUrl/products/$slug'; // GET
-  static String productById(String productId) => '$baseUrl/products/id/$productId'; // GET
+  // static String productById(String productId) => '$baseUrl/products/id/$productId'; // GET
   static String updateOrDeleteProduct(String productId) => '$baseUrl/products/$productId'; // PATCH, DELETE (Admin)
 
   // ==================== Product Review ====================
@@ -36,7 +38,7 @@ class ApiUrls {
   static String cartItemById(String cartItemId) => '$baseUrl/cart/$cartItemId'; // PATCH, DELETE
 
   static const String wishlist = '$baseUrl/wishlist'; // GET (List), POST (Add)
-  static String wishlistItemById(String wishlistItemId) => '$baseUrl/wishlist/$wishlistItemId'; // DELETE
+  static String removeWishlist(String id) => '$baseUrl/wishlist/$id';
 
   // ==================== Order ====================
   static const String orders = '$baseUrl/orders'; // GET (List)
@@ -46,7 +48,7 @@ class ApiUrls {
   static String cancelOrder(String orderId) => '$baseUrl/orders/$orderId/cancel'; // PATCH
 
   // ==================== Slide ====================
-  static const String slides = '$baseUrl/slides'; // GET (List)
+  static const String sliders = '$baseUrl/slides'; // GET (List)
   static const String createSlide = '$baseUrl/slide'; // POST (Admin)
   static String slideById(String slideId) => '$baseUrl/slides/$slideId'; // DELETE (Admin)
 }

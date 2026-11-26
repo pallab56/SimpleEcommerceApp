@@ -1,30 +1,43 @@
 import 'package:equatable/equatable.dart';
-import '../../../../core/common/entities/category.dart';
+import '../../domain/entities/category.dart';
 
-abstract class CategoryState extends Equatable {
+sealed class CategoryState extends Equatable {
   const CategoryState();
+
   @override
   List<Object?> get props => [];
 }
 
-class CategoryInitial extends CategoryState {
+final class CategoryInitial extends CategoryState {
   const CategoryInitial();
 }
 
-class CategoryLoading extends CategoryState {
+final class CategoryLoading extends CategoryState {
   const CategoryLoading();
 }
 
-class CategoryLoaded extends CategoryState {
+final class CategoryLoaded extends CategoryState {
   final List<Category> categories;
-  const CategoryLoaded(this.categories);
+  final int? nextPage;
+  final bool isLoadingMore;
+
+  const CategoryLoaded({
+    required this.categories,
+    this.nextPage,
+    this.isLoadingMore = false,
+  });
+
+  bool get hasMore => nextPage != null;
+
   @override
-  List<Object?> get props => [categories];
+  List<Object?> get props => [categories, nextPage, isLoadingMore];
 }
 
-class CategoryError extends CategoryState {
+final class CategoryError extends CategoryState {
   final String message;
+
   const CategoryError(this.message);
+
   @override
   List<Object?> get props => [message];
 }

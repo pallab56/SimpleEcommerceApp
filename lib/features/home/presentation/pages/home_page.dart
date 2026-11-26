@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/common/entities/category.dart';
+import '../../../../core/common/entities/product.dart';
 import '../../../../core/common/widgets/product_card.dart';
 import '../../../../core/common/widgets/section_header.dart';
-import '../../../../core/common/entities/product.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/route/app_router.dart';
+import '../../../../init_dependencies.dart';
 import '../bloc/home_cubit.dart';
 import '../bloc/home_state.dart';
 import '../widgets/home_app_bar.dart';
-import '../widgets/home_search_bar.dart';
 import '../widgets/home_category_list.dart';
+import '../widgets/home_search_bar.dart';
 import '../widgets/promo_banner_slider.dart';
 
 class HomePage extends StatelessWidget {
@@ -18,7 +20,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HomeCubit()..loadHome(),
+      create: (_) => serviceLocator<HomeCubit>()..loadHome(),
       child: const _HomeView(),
     );
   }
@@ -26,6 +28,15 @@ class HomePage extends StatelessWidget {
 
 class _HomeView extends StatelessWidget {
   const _HomeView();
+
+  void _openCategoryProducts(BuildContext context, Category? category) {
+    if (category == null) return;
+    Navigator.pushNamed(
+      context,
+      AppRoutes.categoryProducts,
+      arguments: category,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +48,19 @@ class _HomeView extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is HomeError) {
-            return Center(child: Text(state.message));
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(state.message),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => context.read<HomeCubit>().loadHome(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
           }
           if (state is HomeLoaded) {
             return _buildContent(context, state);
@@ -61,8 +84,8 @@ class _HomeView extends StatelessWidget {
             HomeSearchBar(onTap: () {}),
             const SizedBox(height: 16),
 
-            // Promo banner
-            const PromoBannerSlider(),
+            // Promo banner from API
+            PromoBannerSlider(banners: state.banners),
             const SizedBox(height: 20),
 
             // All Categories header + horizontal list
@@ -74,28 +97,36 @@ class _HomeView extends StatelessWidget {
             const SizedBox(height: 12),
             HomeCategoryList(
               categories: state.categories,
-              onCategoryTap: (cat) => Navigator.pushNamed(
-                context,
-                AppRoutes.categoryProducts,
-                arguments: cat,
-              ),
+              onCategoryTap: (cat) => _openCategoryProducts(context, cat),
             ),
             const SizedBox(height: 20),
 
             // Popular section
-            SectionHeader(title: AppStrings.popular, onSeeAll: () {}),
+            SectionHeader(
+              title: AppStrings.popular,
+              onSeeAll: () =>
+                  _openCategoryProducts(context, state.popularCategory),
+            ),
             const SizedBox(height: 12),
             _ProductGrid(products: state.popularProducts),
             const SizedBox(height: 20),
 
             // Special section
-            SectionHeader(title: AppStrings.special, onSeeAll: () {}),
+            SectionHeader(
+              title: AppStrings.special,
+              onSeeAll: () =>
+                  _openCategoryProducts(context, state.specialCategory),
+            ),
             const SizedBox(height: 12),
             _ProductGrid(products: state.specialProducts),
             const SizedBox(height: 20),
 
             // New section
-            SectionHeader(title: AppStrings.newArrival, onSeeAll: () {}),
+            SectionHeader(
+              title: AppStrings.newArrival,
+              onSeeAll: () =>
+                  _openCategoryProducts(context, state.newArrivalCategory),
+            ),
             const SizedBox(height: 12),
             _ProductGrid(products: state.newProducts),
             const SizedBox(height: 16),
@@ -106,7 +137,6 @@ class _HomeView extends StatelessWidget {
   }
 }
 
-/// 2-column product grid used for every section on the Home page.
 class _ProductGrid extends StatelessWidget {
   final List<Product> products;
   const _ProductGrid({required this.products});
@@ -125,8 +155,11 @@ class _ProductGrid extends StatelessWidget {
       ),
       itemBuilder: (_, i) => ProductCard(
         product: products[i],
-        onTap: () =>
-            Navigator.pushNamed(context, AppRoutes.productDetails),
+        onTap: () => Navigator.pushNamed(
+          context,
+          AppRoutes.productDetails,
+          arguments: products[i].id,
+        ),
       ),
     );
   }

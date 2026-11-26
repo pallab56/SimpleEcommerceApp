@@ -1,16 +1,19 @@
 import 'package:ecommerceapp/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:ecommerceapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecommerceapp/features/category/presentation/bloc/category_cubit.dart';
+import 'package:ecommerceapp/features/home/presentation/bloc/home_cubit.dart';
 import 'package:ecommerceapp/init_dependencies.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_strings.dart';
 import 'core/route/app_router.dart';
 
-void main()  async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await initDependencies();
 
   SystemChrome.setPreferredOrientations([
@@ -25,13 +28,19 @@ void main()  async{
     ),
   );
 
-  runApp( MultiBlocProvider(
+  runApp(
+    MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => serviceLocator<AppUserCubit>()),
         BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
+        BlocProvider(
+          create: (_) => serviceLocator<CategoryCubit>()..loadCategories(),
+        ),
+        BlocProvider(create: (_) => serviceLocator<HomeCubit>()..loadHome()),
       ],
       child: const CraftyBayApp(),
-    ),);
+    ),
+  );
 }
 
 class CraftyBayApp extends StatelessWidget {

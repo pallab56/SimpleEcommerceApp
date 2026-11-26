@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
 import '../../constants/app_assets.dart';
+import '../../theme/app_colors.dart';
 import '../entities/product.dart';
 
 /// Reusable vertical product card.
 ///
-/// Image always comes from [AppAssets.shoe] (local asset).
+/// Renders [product.imageUrl] from network and falls back to [AppAssets.shoe].
 /// Shows: image, title, price, star rating, wishlist heart.
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -23,6 +23,8 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasNetworkImage = product.imageUrl.startsWith('http');
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -49,10 +51,21 @@ class ProductCard extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
-                    child: Image.asset(
-                      AppAssets.shoe,
-                      fit: BoxFit.cover,
-                    ),
+                    child: hasNetworkImage
+                        ? Image.network(
+                            product.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Image.asset(
+                              AppAssets.shoe,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Image.asset(
+                            product.imageUrl.isNotEmpty
+                                ? product.imageUrl
+                                : AppAssets.shoe,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   Positioned(
                     top: 6,
